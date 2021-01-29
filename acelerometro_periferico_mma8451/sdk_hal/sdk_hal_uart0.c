@@ -65,7 +65,7 @@ void UART0_IRQ_FUNCTION(void)
  * Public Source Code
  ******************************************************************************/
 /*--------------------------------------------*/
-status_t uart0Inicializar(uint32_t baud_rate) {
+status_t uart0Init(uint32_t baud_rate) {
 	lpsci_config_t config;
 	status_t status;
 
@@ -85,11 +85,11 @@ status_t uart0Inicializar(uint32_t baud_rate) {
 	return(status);
 }
 /*--------------------------------------------*/
-uint16_t uart0CuantosDatosHayEnBuffer(void) {
+uint16_t uart0Ready(void) {
 	return ((uint16_t) (rxIndex - txIndex));
 }
 /*--------------------------------------------*/
-status_t uart0LeerByteDesdeBuffer(uint8_t *nuevo_byte){
+status_t uart0Read(uint8_t *nuevo_byte){
 	if ((kLPSCI_TxDataRegEmptyFlag & LPSCI_GetStatusFlags(UART0)) && (rxIndex != txIndex)) {
 		*nuevo_byte=uart0_buffer_circular[txIndex];
 		txIndex++;
