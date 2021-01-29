@@ -84,7 +84,7 @@ BOARD_LedPins:
 - pin_list:
   - {pin_num: '2', peripheral: GPIOB, signal: 'GPIO, 7', pin_signal: PTB7/IRQ_3/TPM1_CH0, direction: OUTPUT, gpio_init_state: 'true'}
   - {pin_num: '13', peripheral: GPIOB, signal: 'GPIO, 10', pin_signal: ADC0_SE9/PTB10/TPM0_CH1, direction: OUTPUT, gpio_init_state: 'true'}
-  - {pin_num: '1', peripheral: GPIOB, signal: 'GPIO, 6', pin_signal: PTB6/IRQ_2/LPTMR0_ALT3/TPM1_CH1/TPM_CLKIN1}
+  - {pin_num: '1', peripheral: GPIOB, signal: 'GPIO, 6', pin_signal: PTB6/IRQ_2/LPTMR0_ALT3/TPM1_CH1/TPM_CLKIN1, direction: OUTPUT, gpio_init_state: 'true'}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -99,6 +99,13 @@ void BOARD_LedPins(void)
 {
     /* Port B Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortB);
+
+    gpio_pin_config_t LED_RED_config = {
+        .pinDirection = kGPIO_DigitalOutput,
+        .outputLogic = 1U
+    };
+    /* Initialize GPIO functionality on pin PTB6 (pin 1)  */
+    GPIO_PinInit(BOARD_LEDPINS_LED_RED_GPIO, BOARD_LEDPINS_LED_RED_PIN, &LED_RED_config);
 
     gpio_pin_config_t LED_GREEN_config = {
         .pinDirection = kGPIO_DigitalOutput,
