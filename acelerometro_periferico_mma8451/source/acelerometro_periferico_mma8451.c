@@ -1,37 +1,3 @@
-/*
- * Copyright 2016-2021 NXP
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of NXP Semiconductor, Inc. nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
- 
-/**
- * @file    acelerometro_periferico_mma8451.c
- * @brief   Application entry point.
- */
 #include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
@@ -39,34 +5,153 @@
 #include "clock_config.h"
 #include "MKL02Z4.h"
 #include "fsl_debug_console.h"
-/* TODO: insert other include files here. */
 
-/* TODO: insert other definitions and declarations here. */
+#include "sdk_hal_gpio.h"
+#include "sdk_hal_uart0.h"
 
-/*
- * @brief   Application entry point.
- */
 int main(void) {
 
-  	/* Init board hardware. */
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
+#define MMA851_I2C_DEVICE_ADDRESS	0x1D
+
+#define MMA8451_WHO_AM_I_MEMORY_ADDRESS  0x0D
+#define MMA8451_CTRL_REG1_ADDRESS  0x2A
+	/* Init board hardware. */
+	BOARD_InitBootPins();
+	BOARD_InitBootClocks();
+	BOARD_InitBootPeripherals();
+
+	enum MMA8451_DirMemory { //lista de direcciones de memoria para los 3 ejes del acelerometro
+		OUT_X_MSB = 0x01, OUT_X_LSB, //0x02
+		OUT_Y_MSB, //0x03
+		OUT_Y_LSB,  //0x04
+		OUT_Z_MSB,  //0x05
+		OUT_Z_LSB,  //0x06
+	};
+
 #ifndef BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL
-    /* Init FSL debug console. */
-    BOARD_InitDebugConsole();
+	/* Init FSL debug console. */
+	BOARD_InitDebugConsole();
 #endif
 
-    PRINTF("Hello World\n");
+	(void) uart0Init(115200);
 
-    /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
-    /* Enter an infinite loop, just incrementing a counter. */
-    while(1) {
-        i++ ;
-        /* 'Dummy' NOP to allow source level single stepping of
-            tight while() loop */
-        __asm volatile ("nop");
-    }
-    return 0 ;
+	(void) i2c0MasterInit(100000);	//100kbps
+
+	PRINTF("Usar teclado para controlar LEDs \r\n");
+
+	PRINTF("r-R led ROJO \r\n ");
+	PRINTF("v-V LED verde\r\n");
+	PRINTF("a-A LED azul\r\n");
+
+	//resultado = gpioPutToggle(KPTB7);
+	status_t status;
+	uint8_t letra;
+	uint8_t nuevo_dato_i2c;
+	uint16_t dato_eje;
+	uint16_t dato_MSB;
+	uint8_t dato_LSB;
+
+	status = i2c0MasterWriteByte(0x01, MMA851_I2C_DEVICE_ADDRESS, MMA8451_CTRL_REG1_ADDRESS); //Con esto activamos el Acelerometro
+
+	/* Force the counter to be placed into memory. */
+	/* Enter an infinite loop, just incrementing a counter. */
+	while (1) {
+
+		if (uart0Ready() > 0) {
+			status = uart0Read(&letra);
+			printf("dato entrante: %c \r\n", letra);
+
+			switch (letra) {
+
+			case 'a':
+			case 'A':
+				gpioPutToggle(KPTB10);
+				break;
+			case 'r':
+				gpioPutValue(KPTB6, 0);
+				break;
+			case 'R':
+				gpioPutValue(KPTB6, 1);
+				break;
+			case 'v':
+				gpioPutHigh(KPTB7);
+				break;
+			case 'V':
+				gpioPutLow(KPTB7);
+				break;
+
+			case 'M':
+			case 'm':
+				i2c0MasterReadByte(&nuevo_dato_i2c, MMA851_I2C_DEVICE_ADDRESS,
+				MMA8451_WHO_AM_I_MEMORY_ADDRESS);
+				if (nuevo_dato_i2c == 0x1A)
+					printf("MMA8451 encontrado!!\r\n");
+				else
+					printf("MMA8451 error\r\n");
+				break;
+
+			case 'x':
+			case 'X':
+				// VARIABLE DONDE SE ALMACENA EL DATO,  DIRECCION DEL ESCLAVO,  VARIABLE QUE VAS A LEER DEL ESCLAVO)
+				i2c0MasterReadByte(&dato_MSB, MMA851_I2C_DEVICE_ADDRESS,OUT_X_MSB);
+				i2c0MasterReadByte(&dato_LSB, MMA851_I2C_DEVICE_ADDRESS,OUT_X_LSB);
+				dato_MSB <<= 8;
+				dato_eje = dato_MSB | dato_LSB;
+				dato_eje >>= 2;
+				printf("Lectura Eje X:  %d \r\n", dato_eje);
+				break;
+			case 'y':
+			case 'Y':
+				// VARIABLE DONDE SE ALMACENA EL DATO,  DIRECCION DEL ESCLAVO,  VARIABLE QUE VAS A LEER DEL ESCLAVO)
+				i2c0MasterReadByte(&dato_MSB, MMA851_I2C_DEVICE_ADDRESS,OUT_Y_MSB);
+				i2c0MasterReadByte(&dato_LSB, MMA851_I2C_DEVICE_ADDRESS,OUT_Y_LSB);
+				dato_MSB <<= 8;
+				dato_eje = dato_MSB | dato_LSB;
+				dato_eje >>= 2;
+				printf("Lectura Eje Y: %d \r\n", dato_eje);
+				break;
+			case 'z':
+			case 'Z':
+				// VARIABLE DONDE SE ALMACENA EL DATO,  DIRECCION DEL ESCLAVO,  VARIABLE QUE VAS A LEER DEL ESCLAVO)
+				i2c0MasterReadByte(&dato_MSB, MMA851_I2C_DEVICE_ADDRESS,
+						OUT_Z_MSB);
+				i2c0MasterReadByte(&dato_LSB, MMA851_I2C_DEVICE_ADDRESS,
+						OUT_Z_LSB);
+				dato_MSB <<= 8;
+				dato_eje = dato_MSB | dato_LSB;
+				dato_eje >>= 2;
+				printf("Lectura Eje Z: %d \r\n", dato_eje);
+				break;
+
+			case 't':
+			case 'T':
+				i2c0MasterReadByte(&dato_MSB, MMA851_I2C_DEVICE_ADDRESS,OUT_X_MSB);
+				i2c0MasterReadByte(&dato_LSB, MMA851_I2C_DEVICE_ADDRESS,OUT_X_LSB);
+				dato_MSB <<= 8;
+				dato_eje = dato_MSB | dato_LSB;
+				dato_eje >>= 2;
+				printf("Lectura Eje x: %d,", dato_eje);
+				i2c0MasterReadByte(&dato_MSB, MMA851_I2C_DEVICE_ADDRESS,OUT_Y_MSB);
+				i2c0MasterReadByte(&dato_LSB, MMA851_I2C_DEVICE_ADDRESS,OUT_Y_LSB);
+				dato_MSB <<= 8;
+				dato_eje = dato_MSB | dato_LSB;
+				dato_eje >>= 2;
+				printf("Lectura Eje y: %d,", dato_eje);
+				i2c0MasterReadByte(&dato_MSB, MMA851_I2C_DEVICE_ADDRESS,OUT_Z_MSB);
+				i2c0MasterReadByte(&dato_LSB, MMA851_I2C_DEVICE_ADDRESS,OUT_Z_LSB);
+				dato_MSB <<= 8;
+				dato_eje = dato_MSB | dato_LSB;
+				dato_eje >>= 2;
+				printf("Lectura Eje Z: %d \r\n", dato_eje);
+				break;
+
+			default:
+				printf("letra incorrecta :( \r\n");
+				break;
+
+			}
+
+		}
+	}
+	return 0;
 }
