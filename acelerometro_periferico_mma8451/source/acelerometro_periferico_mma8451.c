@@ -9,6 +9,10 @@
 #include "sdk_hal_gpio.h"
 #include "sdk_hal_uart0.h"
 
+#include "sdk_mdlw_leds.h"
+#include "sdk_pph_ec25au.h"
+#include "sdk_pph_mma8451Q.h"
+
 int main(void) {
 
 #define MMA851_I2C_DEVICE_ADDRESS	0x1D
