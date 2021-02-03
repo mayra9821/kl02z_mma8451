@@ -1,11 +1,12 @@
 /*! @file : sdk_hal_uart0.h
- * @author  Mayra Torres
+ * @author  Ernesto Andres Rincon Cruz
  * @version 1.0.0
- * @date    27 ene. 2021
- * @brief   Driver para 
+ * @date    8/01/2021
+ * @brief   Driver para UART0
  * @details
  *
  */
+
 #ifndef SDK_HAL_UART0_H_
 #define SDK_HAL_UART0_H_
 /*******************************************************************************
@@ -25,7 +26,7 @@
  * Public Definitions
  ******************************************************************************/
 /*! @brief Tamaño de buffer circular para recibir datos por UART (Unit: Byte). */
-#define LONGITUD_BUFFER_CIRCULAR 	64
+#define LONGITUD_BUFFER_CIRCULAR 	100
 
 /*******************************************************************************
  * External vars
@@ -54,7 +55,7 @@
  * 		kStatus_NoTransferInProgress
  * @endcode
  */
-status_t uart0Init(uint32_t baud_rate);
+status_t uart0Inicializar(uint32_t baud_rate);
 /*--------------------------------------------*/
 /*!
  * @brief Calcula el numero de datos nuevos que hay en el buffer circular
@@ -62,7 +63,7 @@ status_t uart0Init(uint32_t baud_rate);
  * @return	numero de bytes que estan pendientes por ser procesados
  * @endcode
  */
-uint16_t uart0Ready(void);
+uint16_t uart0CuantosDatosHayEnBuffer(void);
 /*--------------------------------------------*/
 /*!
  * @brief Obtiene 1 byte desde buffer circular
@@ -74,7 +75,7 @@ uint16_t uart0Ready(void);
  * 		kStatus_Fail
  * @endcode
  */
-status_t uart0Read(uint8_t *nuevo_byte);
+status_t uart0LeerByteDesdeBuffer(uint8_t *nuevo_byte);
 
 /** @} */ // end of UART0 group
 /** @} */ // end of HAL group

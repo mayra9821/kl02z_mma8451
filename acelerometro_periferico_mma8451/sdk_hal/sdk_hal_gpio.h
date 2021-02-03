@@ -1,8 +1,8 @@
 /*! @file : sdk_hal_gpio.h
- * @author  Mayra Torres
+ * @author  Ernesto Andres Rincon Cruz
  * @version 1.0.0
- * @date    27 ene. 2021
- * @brief   Driver para 
+ * @date    10/01/2021
+ * @brief   Driver for GPIO
  * @details
  *
  */
@@ -11,28 +11,31 @@
 /*******************************************************************************
  * Includes
  ******************************************************************************/
-
-#include"fsl_common.h"
+#include "fsl_common.h"
 
 /*!
- * @addtogroup X HAL
+ * @addtogroup HAL
  * @{
  */
 /*!
- * @addtogroup X GPIO
+ * @addtogroup GPIO
  * @{
  */
 /*******************************************************************************
  * Public Definitions
  ******************************************************************************/
+/*!
+ * @brief list  of gpio port available on KL02Z microcontrollers.
+ */
+enum _gpio_port_list_available
+{
+	KGPIOA=0X00,
+	KGPIOB
+};
 
-/*******************************************************************************
- * External vars
- ******************************************************************************/
-
-/*******************************************************************************
- * Public vars
- ******************************************************************************/
+/*!
+ * @brief list  of gpio pin available on KL02Z microcontrollers.
+ */
 enum _gpio_pin_list_available
 {
 	/*!< GPIOA*/
@@ -71,21 +74,68 @@ enum _gpio_pin_list_available
 	KPTB14,	/*!< Not available*/
 	KPTB15,	/*!< Not available*/
 };
+/*******************************************************************************
+ * External vars
+ ******************************************************************************/
 
-enum _port_list_available
-{
-	KGPIOA=0,
-	KGPIOB,
-};
+/*******************************************************************************
+ * Public vars
+ ******************************************************************************/
+
 /*******************************************************************************
  * Public Prototypes
  ******************************************************************************/
-
+/*!
+ * @brief Set specific pin to high value
+ *
+ * @param pin_to_change	pin name code
+ * @see	_gpio_pin_list_available
+ * @return	execution error code
+ * @code
+ * 		kStatus_Success
+ * 		kStatus_Fail
+ * @endcode
+ */
 status_t gpioPutHigh(uint16_t pin_to_change);
+/*!
+ * @brief Set specific pin to low value
+ *
+ * @param pin_to_change	pin name code
+ * @see	_gpio_pin_list_available
+ * @return	execution error code
+ * @code
+ * 		kStatus_Success
+ * 		kStatus_Fail
+ * @endcode
+ */
 status_t gpioPutLow(uint16_t pin_to_change);
+/*!
+ * @brief Set specific pin to new specific value
+ *
+ * @param pin_to_change	pin name code
+ * @see	_gpio_pin_list_available
+ * @param new_value new value to be pushed on specific pin
+ * @return	execution error code
+ * @code
+ * 		kStatus_Success
+ * 		kStatus_Fail
+ * @endcode
+ */
 status_t gpioPutValue(uint16_t pin_to_change, uint8_t new_value);
+/*!
+ * @brief Set toggle on specific pin
+ *
+ * @param pin_to_change	pin name code
+ * @see	_gpio_pin_list_available
+ * @return	execution error code
+ * @code
+ * 		kStatus_Success
+ * 		kStatus_Fail
+ * @endcode
+ */
 status_t gpioPutToggle(uint16_t pin_to_change);
 
-/** @} */ // end of X group
+/** @} */ // end of GPIO group
+/** @} */ // end of HAL group
 
 #endif /* SDK_HAL_GPIO_H_ */

@@ -1,8 +1,8 @@
 /*! @file : sdk_hal_i2c0.h
- * @author  Mayra Torres
+ * @author  Ernesto Andres Rincon Cruz
  * @version 1.0.0
- * @date    28 ene. 2021
- * @brief   Driver para 
+ * @date    11/01/2021
+ * @brief   Driver for I2C0
  * @details
  *
  */
@@ -39,33 +39,44 @@
  ******************************************************************************/
 /*--------------------------------------------*/
 /*!
- * @brief Inicializa I2C0 al baudrate especificado
+ * @brief Perform a I2C0 initialization
  *
- * @param baud_rate   baudrate (bps) que se quiere configurado en I2C0
- * @return            resultado de la ejecución
+ * @param baud_rate   baudrate (bps) for I2C module
+ * @return            status for process
  * @code
  * 		kStatus_Success
  * 		kStatus_Fail
  * @endcode
  */
 status_t i2c0MasterInit(uint32_t baud_rate);
-
+/*--------------------------------------------*/
 /*!
- * @brief Lee 1 byte usando puerto I2C0
+ * @brief Read byte from I2C0 devide
  *
- * @param data   			apuntador a memoria donde almacenar dato obtenido
- * @param device_address	direccion en bus I2C de dispositivo remoto a leer
- * @param memory_address	posicion de memoria en el dispositivo remoto que se quiere leer
- * @return            		resultado de la ejecución
+ * @param data				memory adderess pointer
+ * @param bytes_to_read		number of byte to read form i2c device
+ * @param device_address	I2C address
+ * @return            resultado de la ejecución
  * @code
  * 		kStatus_Success
  * 		kStatus_Fail
  * @endcode
  */
-status_t i2c0MasterReadByte(uint8_t *data, uint8_t device_address, int8_t memory_address);
-
-status_t i2c0MasterWriteByte( uint8_t data, uint8_t device_address, int8_t memory_address);
-
+status_t i2c0MasterReadByte(uint8_t *data, uint8_t bytes_to_read, uint8_t device_address, int8_t memory_address);
+/*--------------------------------------------*/
+/*!
+ * @brief Write byte to I2C0 devide
+ *
+ * @param data				memory adderess pointer
+ * @param bytes_to_read		number of byte to write on i2c device
+ * @param device_address	I2C address
+ * @return            resultado de la ejecución
+ * @code
+ * 		kStatus_Success
+ * 		kStatus_Fail
+ * @endcode
+ */
+status_t i2c0MasterWriteByte(uint8_t *data, uint8_t bytes_to_write, uint8_t device_address, int8_t memory_address);
 
 
 

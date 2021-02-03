@@ -1,7 +1,7 @@
 /*! @file : sdk_hal_uart0.c
- * @author  Mayra Torres
+ * @author  Ernesto Andres Rincon Cruz
  * @version 1.0.0
- * @date    27/01/2021
+ * @date    8/01/2021
  * @brief   Driver para UART0
  * @details
  *
@@ -65,7 +65,7 @@ void UART0_IRQ_FUNCTION(void)
  * Public Source Code
  ******************************************************************************/
 /*--------------------------------------------*/
-status_t uart0Init(uint32_t baud_rate) {
+status_t uart0Inicializar(uint32_t baud_rate) {
 	lpsci_config_t config;
 	status_t status;
 
@@ -85,17 +85,17 @@ status_t uart0Init(uint32_t baud_rate) {
 	return(status);
 }
 /*--------------------------------------------*/
-uint16_t uart0Ready(void) {
+uint16_t uart0CuantosDatosHayEnBuffer(void) {
 	return ((uint16_t) (rxIndex - txIndex));
 }
 /*--------------------------------------------*/
-status_t uart0Read(uint8_t *nuevo_byte){
+status_t uart0LeerByteDesdeBuffer(uint8_t *nuevo_byte) {
 	if ((kLPSCI_TxDataRegEmptyFlag & LPSCI_GetStatusFlags(UART0)) && (rxIndex != txIndex)) {
-		*nuevo_byte=uart0_buffer_circular[txIndex];
+		*nuevo_byte = uart0_buffer_circular[txIndex];
 		txIndex++;
 		txIndex %= LONGITUD_BUFFER_CIRCULAR;
-		return(kStatus_Success);
-	}else{
-		return(kStatus_Fail);
+		return (kStatus_Success);
+	} else {
+		return (kStatus_Fail);
 	}
 }
